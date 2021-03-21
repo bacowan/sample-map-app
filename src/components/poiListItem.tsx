@@ -8,7 +8,7 @@ function PoiListItem({poi, index, isSelected, itemClickHandler}: PoiListItemProp
     );
 }
 
-type PoiListItemProps = {
+export type PoiListItemProps = {
     poi: Poi,
     index: number,
     isSelected: boolean,
