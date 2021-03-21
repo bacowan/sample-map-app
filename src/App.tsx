@@ -13,7 +13,7 @@ function App() {
     <div className="App">
       <Title header="Cycling trip across Japan" body="A list of waypoints that I'd like to visit on a cycling trip across Japan."/>
       <Map pois={data} selectedPoiIndex={selectedPoiIndex}/>
-      <PoiList pois={data} itemClickHandler={setSelectedPoiIndex}/>
+      <PoiList pois={data} selectedPoiIndex={selectedPoiIndex} setSelectedPoiIndex={setSelectedPoiIndex}/>
     </div>
   );
 }

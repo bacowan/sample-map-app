@@ -1,19 +1,41 @@
 import Poi from "../types/poi";
 import PoiListItem from "./poiListItem";
 
-function PoiList({pois, itemClickHandler}: PoiListProps) {
+function PoiList({pois, selectedPoiIndex, setSelectedPoiIndex}: PoiListProps) {
+    function previousClick() {
+        if (selectedPoiIndex != null) {
+            setSelectedPoiIndex((selectedPoiIndex + pois.length - 1) % pois.length);
+        }
+    }
+
+    function nextClick() {
+        if (selectedPoiIndex != null) {
+            setSelectedPoiIndex((selectedPoiIndex + 1) % pois.length);
+        }
+    }
+
     return (
-    <div className="poi-list">
-        <strong>Points of interest</strong>
-        <ul>
-            {pois.map((p, i) => <PoiListItem key={i} poi={p} index={i} itemClickHandler={itemClickHandler}/>)}
-        </ul>
-    </div>);
+        <div className="poi-list">
+            <strong className="poi-list-header">Points of interest</strong>
+            <ul>
+                {pois.map((p, i) => <PoiListItem
+                    key={i}
+                    poi={p}
+                    index={i}
+                    isSelected={i === selectedPoiIndex}
+                    itemClickHandler={setSelectedPoiIndex}/>)}
+            </ul>
+            <div className="navigation-buttons poi-list-footer">
+                <button onClick={previousClick}>previous</button>
+                <button onClick={nextClick}>next</button>
+            </div>
+        </div>);
 }
 
 type PoiListProps = {
     pois: Poi[],
-    itemClickHandler: (index: number) => void
+    selectedPoiIndex: number | null,
+    setSelectedPoiIndex: (index: number) => void
 }
 
 export default PoiList;

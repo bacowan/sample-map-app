@@ -34,11 +34,23 @@
 	height: 40%;
 	background-color: aliceblue;
     padding: 1em;
+    display: flex;
+    flex-flow: column;
+}
+
+.poi-list-header {
+    flex: 0 1 auto;
+}
+
+.poi-list-footer {
+    flex: 0 1 auto;
 }
 
 .poi-list > ul {
     list-style-type: none;
 	padding: 0;
+    flex: 1 1 auto;
+    overflow-y: scroll;
 }
 
 .poi-list > ul > li {
@@ -47,6 +59,16 @@
 	border-width: 1px;
 	padding: 0.5em;
 	cursor: pointer;
+}
+
+.poi-list > ul > li.selected-item {
+    background-color: black;
+    color: white;
+}
+
+.navigation-buttons {
+    position: absolute;
+    bottom: 1em;
 }
 
 h1 {

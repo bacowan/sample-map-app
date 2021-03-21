@@ -1,8 +1,8 @@
 import Poi from "../types/poi";
 
-function PoiListItem({poi, index, itemClickHandler}: PoiListItemProps) {
+function PoiListItem({poi, index, isSelected, itemClickHandler}: PoiListItemProps) {
     return (
-        <li onClick={e => itemClickHandler(index)}>
+        <li onClick={e => itemClickHandler(index)} className={isSelected ? 'selected-item' : ''}>
             {poi.title}
         </li>
     );
@@ -11,6 +11,7 @@ function PoiListItem({poi, index, itemClickHandler}: PoiListItemProps) {
 type PoiListItemProps = {
     poi: Poi,
     index: number,
+    isSelected: boolean,
     itemClickHandler: (index: number) => void
 }
 
