@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import * as mapboxgl from 'mapbox-gl';
 import Poi from '../types/poi';
 import { normalizeLat, normalizeLon } from '../utils';
+import Popup from './popup';
 
 function Map({pois}: MapProps) {
     const mapContainer = useRef<HTMLDivElement>(null);
@@ -39,7 +40,8 @@ function Map({pois}: MapProps) {
             const features = pois.map(p => { return {
                 type: 'Feature' as 'Feature',
                 properties: {
-                    description: `<strong>${p.title}</strong><p>${p.description}</p>`,
+                    title: p.title,
+                    description: p.description,
                     icon: 'circle'
                 },
                 geometry: {
@@ -67,6 +69,29 @@ function Map({pois}: MapProps) {
                     'icon-image': '{icon}-15',
                     'icon-allow-overlap': true
                 }
+            });
+            
+            scopeMap.on('click', 'places', (e) => {
+                if (e.features != null && e.features[0].properties != null && e.features[0].properties.hasOwnProperty('title') && e.features[0].properties.hasOwnProperty('description')) {
+                    const popup = document.createElement('div');
+                    ReactDOM.render(
+                        <Popup header={e.features[0].properties.title} body={e.features[0].properties.description}/>,
+                        popup
+                    );
+                    new mapboxgl.Popup()
+                        .setLngLat(e.lngLat)
+                        .setDOMContent(popup)
+                        .addTo(scopeMap)
+                }
+            });
+
+            scopeMap.on('mouseenter', 'places', function () {
+                scopeMap.getCanvas().style.cursor = 'pointer';
+            });
+                
+            // Change it back to a pointer when it leaves.
+            scopeMap.on('mouseleave', 'places', function () {
+                scopeMap.getCanvas().style.cursor = '';
             });
         }
     }, [pois, map, isMapLoaded]);
