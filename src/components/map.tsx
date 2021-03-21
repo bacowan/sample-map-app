@@ -126,9 +126,7 @@ function Map({pois, selectedPoiIndex}: MapProps) {
         return <div/>
     }
     else {
-        return (<div>
-            <div className="map-container" ref={mapContainer} />
-        </div>);
+        return (<div className="map-container" ref={mapContainer} />);
     }
 }
 
