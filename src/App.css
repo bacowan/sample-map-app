@@ -14,4 +14,26 @@
 	height: 50px;
 	border-radius: 50%;
 	cursor: pointer;
-	}
+}
+
+.poi-list {
+	position: absolute;
+	top: 5%;
+	left: 5%;
+	height: 40%;
+	background-color: aliceblue;
+    padding: 1em;
+}
+
+.poi-list > ul {
+    list-style-type: none;
+	padding: 0;
+}
+
+.poi-list > ul > li {
+    border-top-style: solid;
+    border-bottom-style: solid;
+	border-width: 1px;
+	padding: 0.5em;
+	cursor: pointer;
+}

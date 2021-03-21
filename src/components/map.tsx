@@ -5,14 +5,30 @@ import Poi from '../types/poi';
 import { normalizeLat, normalizeLon } from '../utils';
 import Popup from './popup';
 
-function Map({pois}: MapProps) {
+function Map({pois, selectedPoiIndex}: MapProps) {
     const mapContainer = useRef<HTMLDivElement>(null);
-    const [lng, setLng] = useState(0);
-    const [lat, setLat] = useState(0);
-    const [zoom, setZoom] = useState(9);
-    const [markers, setMarkers] = useState([]);
     const [map, setMap] = useState<mapboxgl.Map | null>(null);
     const [isMapLoaded, setIsMapLoaded] = useState(false);
+    const [popup, setPopup] = useState<mapboxgl.Popup | null>(null);
+
+    function showPopup(header: string, description: string, lngLat: mapboxgl.LngLatLike) {
+        const scopeMap = map;
+        if (scopeMap != null) {
+            // the previous popup sometimes hangs around; this forces it to close.
+            if (popup != null) {
+                popup.remove();
+            }
+            const popupDiv = document.createElement('div');
+            ReactDOM.render(
+                <Popup header={header} body={description}/>,
+                popupDiv
+            );
+            setPopup(new mapboxgl.Popup()
+                .setLngLat(lngLat)
+                .setDOMContent(popupDiv)
+                .addTo(scopeMap));
+        }
+    }
 
     useEffect(() => {
         if (mapContainer.current != null) {
@@ -20,14 +36,32 @@ function Map({pois}: MapProps) {
                 accessToken: process.env.REACT_APP_MAPBOX_TOKEN,
                 container: mapContainer.current,
                 style: 'mapbox://styles/mapbox/satellite-v9',
-                center: [lng, lat],
-                zoom: zoom
+                center: [0, 0],
+                zoom: 9
             });
             scopeMap.on('load', () => setIsMapLoaded(true));
             setMap(scopeMap);
             return () => scopeMap.remove();
         }
     }, [mapContainer]);
+
+    useEffect(() => {
+        const scopeMap = map;
+        if (selectedPoiIndex != null && scopeMap != null) {
+            if (selectedPoiIndex < pois.length) {
+                const poi = pois[selectedPoiIndex];
+                const lonLat = [poi.lon, poi.lat] as mapboxgl.LngLatLike;
+                scopeMap.flyTo({
+                    center: lonLat,
+                    zoom: 9 // TODO: Make this a constant
+                });
+                showPopup(poi.title, poi.description, lonLat);
+            }
+            else {
+                //todo: error handling
+            }
+        }
+    }, [selectedPoiIndex, map]);
 
     useEffect(() => {
         const scopeMap = map;
@@ -73,15 +107,7 @@ function Map({pois}: MapProps) {
             
             scopeMap.on('click', 'places', (e) => {
                 if (e.features != null && e.features[0].properties != null && e.features[0].properties.hasOwnProperty('title') && e.features[0].properties.hasOwnProperty('description')) {
-                    const popup = document.createElement('div');
-                    ReactDOM.render(
-                        <Popup header={e.features[0].properties.title} body={e.features[0].properties.description}/>,
-                        popup
-                    );
-                    new mapboxgl.Popup()
-                        .setLngLat(e.lngLat)
-                        .setDOMContent(popup)
-                        .addTo(scopeMap)
+                    showPopup(e.features[0].properties.title, e.features[0].properties.description, e.lngLat);
                 }
             });
 
@@ -107,7 +133,8 @@ function Map({pois}: MapProps) {
 }
 
 type MapProps = {
-    pois: Poi[]
+    pois: Poi[],
+    selectedPoiIndex: number | null
 }
 
 export default Map;

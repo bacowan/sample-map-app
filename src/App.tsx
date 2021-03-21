@@ -3,15 +3,15 @@ import Map from './components/map';
 import PoiList from './components/poiList';
 import { getPois } from './data';
 import './App.css';
-import Poi from './types/poi';
 
 function App() {
   const [data, _] = useState(getPois());
+  const [selectedPoiIndex, setSelectedPoiIndex] = useState<number | null>(null);
 
   return (
     <div className="App">
-      <Map pois={data}/>
-      <PoiList pois={data}/>
+      <Map pois={data} selectedPoiIndex={selectedPoiIndex}/>
+      <PoiList pois={data} itemClickHandler={setSelectedPoiIndex}/>
     </div>
   );
 }
