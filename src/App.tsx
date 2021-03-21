@@ -2,12 +2,20 @@ import { useState, useEffect } from 'react';
 import Map from './components/map';
 import PoiList from './components/poiList';
 import Title from './components/title'
-import { getPois } from './data';
 import './App.css';
+import { getPois } from './utils';
+import Poi from './types/poi';
 
 function App() {
-  const [data, _] = useState(getPois());
+  const [data, setData] = useState<Poi[]>([]);
   const [selectedPoiIndex, setSelectedPoiIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    async function getData() {
+      setData(await getPois());
+    }
+    getData();
+  }, []);
 
   return (
     <div className="App">

@@ -30,6 +30,7 @@ function Map({pois, selectedPoiIndex}: MapProps) {
         }
     }
 
+    // Initialize the map. When it finishes loading, the next effect will finish initialization
     useEffect(() => {
         if (mapContainer.current != null) {
             const scopeMap = new mapboxgl.Map({
@@ -47,22 +48,25 @@ function Map({pois, selectedPoiIndex}: MapProps) {
 
     useEffect(() => {
         const scopeMap = map;
-        if (selectedPoiIndex != null && scopeMap != null) {
-            if (selectedPoiIndex < pois.length) {
-                const poi = pois[selectedPoiIndex];
-                const lonLat = [poi.lon, poi.lat] as mapboxgl.LngLatLike;
-                scopeMap.flyTo({
-                    center: lonLat,
-                    zoom: 9 // TODO: Make this a constant
-                });
-                showPopup(poi.title, poi.description, lonLat);
-            }
-            else {
-                //todo: error handling
-            }
-        }
-    }, [selectedPoiIndex, map]);
+        if (isMapLoaded && scopeMap != null) {
+            scopeMap.on('click', 'places', (e) => {
+                if (e.features != null && e.features[0].properties != null && e.features[0].properties.hasOwnProperty('title') && e.features[0].properties.hasOwnProperty('description')) {
+                    showPopup(e.features[0].properties.title, e.features[0].properties.description, e.lngLat);
+                }
+            });
 
+            scopeMap.on('mouseenter', 'places', function () {
+                scopeMap.getCanvas().style.cursor = 'pointer';
+            });
+                
+            // Change it back to a pointer when it leaves.
+            scopeMap.on('mouseleave', 'places', function () {
+                scopeMap.getCanvas().style.cursor = '';
+            });
+        }
+    }, [map, isMapLoaded]);
+
+    // update POIs
     useEffect(() => {
         const scopeMap = map;
         if (isMapLoaded && scopeMap != null) {
@@ -70,7 +74,7 @@ function Map({pois, selectedPoiIndex}: MapProps) {
                 const lngLats = pois.map(p => new mapboxgl.LngLat(normalizeLon(p.lon), normalizeLat(p.lat))) as mapboxgl.LngLatBoundsLike;
                 scopeMap.fitBounds(lngLats);
             }
-
+    
             const features = pois.map(p => { return {
                 type: 'Feature' as 'Feature',
                 properties: {
@@ -87,6 +91,10 @@ function Map({pois, selectedPoiIndex}: MapProps) {
                 }
             }});
 
+            if (scopeMap.getSource('places')) {
+                scopeMap.removeSource('places');
+            }
+    
             scopeMap.addSource('places', {
                 'type': 'geojson',
                 'data': {
@@ -95,6 +103,10 @@ function Map({pois, selectedPoiIndex}: MapProps) {
                 } }
             );
             
+            if (scopeMap.getLayer('places')) {
+                scopeMap.removeLayer('places');
+            }
+
             scopeMap.addLayer({
                 id: 'places',
                 type: 'symbol',
@@ -104,23 +116,27 @@ function Map({pois, selectedPoiIndex}: MapProps) {
                     'icon-allow-overlap': true
                 }
             });
-            
-            scopeMap.on('click', 'places', (e) => {
-                if (e.features != null && e.features[0].properties != null && e.features[0].properties.hasOwnProperty('title') && e.features[0].properties.hasOwnProperty('description')) {
-                    showPopup(e.features[0].properties.title, e.features[0].properties.description, e.lngLat);
-                }
-            });
-
-            scopeMap.on('mouseenter', 'places', function () {
-                scopeMap.getCanvas().style.cursor = 'pointer';
-            });
-                
-            // Change it back to a pointer when it leaves.
-            scopeMap.on('mouseleave', 'places', function () {
-                scopeMap.getCanvas().style.cursor = '';
-            });
         }
-    }, [pois, map, isMapLoaded]);
+    }, [map, isMapLoaded, pois]);
+
+    // Move to a given POI
+    useEffect(() => {
+        const scopeMap = map;
+        if (selectedPoiIndex != null && scopeMap != null) {
+            if (selectedPoiIndex < pois.length) {
+                const poi = pois[selectedPoiIndex];
+                const lonLat = [poi.lon, poi.lat] as mapboxgl.LngLatLike;
+                scopeMap.flyTo({
+                    center: lonLat,
+                    zoom: 9 // TODO: Make this a constant
+                });
+                showPopup(poi.title, poi.description, lonLat);
+            }
+            else {
+                //todo: error handling
+            }
+        }
+    }, [selectedPoiIndex, map]);
     
     if (mapContainer == null) {
         return <div/>

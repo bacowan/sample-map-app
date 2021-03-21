@@ -24,3 +24,5 @@ yarn-error.log*
 
 .env.local
 .vscode
+
+selenium_tests/chromedriver.exe
