@@ -1,4 +1,5 @@
 import Poi from "./types/poi";
+import data from "./data";
 
 export function normalizeLat(lat: number) {
     return ((lat + 90) % 180) - 90;
@@ -26,29 +27,28 @@ function poiFromJson(json: any) : Poi {
     }
 }
 
+// One way to get data would be to call a server to retrieve it.
+// This app has no data server, but if it did this method is where
+// that data would be grabbed. For this mock application, we simply
+// return the hardcoded data. For the sake of testing, we allow
+// data to be set as the URL parameters. In a production environment,
+// we could instead intercept the network calls and replace the responses
+// with our test data.
 export async function getPois() : Promise<Poi[]> {
-    if (process.env.REACT_APP_DATA_URL != null) {
-        const response = await fetch(process.env.REACT_APP_DATA_URL);
-        const test = process.env.REACT_APP_DATA_URL;
-        if (response.status == 200) {
-            // TODO: Error handle bad json
-            const asJson = await response.json();
-            if (Array.isArray(asJson)) {
-                // TODO: Error handling
-                return asJson.map(j => poiFromJson(j));
-            }
-            else {
-                // TODO: Error handling
-                return [];
-            }
+    try {
+        const url = new URLSearchParams(window.location.search);
+        const poiParameter = url.get("pois");
+        const poiObj = JSON.parse(poiParameter == null ? data : poiParameter);
+        if (Array.isArray(poiObj)) {
+            return poiObj.map(p => poiFromJson(p));
         }
         else {
             // TODO: Error handling
-                return [];
+            return [];
         }
     }
-    else {
+    catch (e) {
         // TODO: Error handling
-            return [];
+        throw e;
     }
 }

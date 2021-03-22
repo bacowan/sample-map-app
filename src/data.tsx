@@ -1,7 +1,4 @@
-import Poi from './types/poi';
-
-export function getPois() : Poi[] {
-    return [
+const data = JSON.stringify([
         {
             lat: 45.523241975045636,
             lon: 141.93649435423438,
@@ -14,5 +11,6 @@ export function getPois() : Poi[] {
             title: 'Cape Sata',
             description: 'Southernmost point in mainland Japan'
         }
-    ];
-}
+    ]);
+
+export default data;

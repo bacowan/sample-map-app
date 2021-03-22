@@ -91,18 +91,22 @@ function Map({pois, selectedPoiIndex}: MapProps) {
                 }
             }});
 
-            if (scopeMap.getSource('places')) {
-                scopeMap.removeSource('places');
+            const data : GeoJSON.FeatureCollection<GeoJSON.Geometry> = {
+                'type': 'FeatureCollection',
+                'features': features
+            };
+            const source = scopeMap.getSource('places') as mapboxgl.GeoJSONSource;
+            if (source) {
+                source.setData(data);
+            }
+            else {
+                scopeMap.addSource('places', {
+                    'type': 'geojson',
+                    'data': data }
+                );
+                
             }
     
-            scopeMap.addSource('places', {
-                'type': 'geojson',
-                'data': {
-                    'type': 'FeatureCollection',
-                    'features': features
-                } }
-            );
-            
             if (scopeMap.getLayer('places')) {
                 scopeMap.removeLayer('places');
             }
