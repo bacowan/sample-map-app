@@ -13,12 +13,12 @@ function PoiTagFilter({selectedValue, setSelectedValue} : PoiTagFilterProps) {
     }
 
     const options = Object.entries(PoiTag)
-        .map(t => <option value={t[0]}>{t[1]}</option>);
+        .map(t => <option key={t[0]} value={t[0]}>{t[1]}</option>);
     return (
         <div className="filter-list">
             <p>Filter by: </p>
             <select value={selectedValue} onChange={onChange}>
-                <option value=""></option>
+                <option key="" value=""></option>
                 {options}
             </select>
         </div>

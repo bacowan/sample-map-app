@@ -6,6 +6,7 @@ import './App.css';
 import { getPois } from './utils';
 import Poi from './types/poi';
 import PoiTag from './types/poiTag';
+import MapErrorBoundary from './components/mapErrorBoundary';
 
 function App() {
   const [data, setData] = useState<Poi[]>([]);
@@ -21,7 +22,9 @@ function App() {
   return (
     <div className="App">
       <Title header="Cycling trip across Japan" body="A list of waypoints that I'd like to visit on a cycling trip across Japan."/>
-      <Map pois={data} selectedPoiIndex={selectedPoiIndex}/>
+      <MapErrorBoundary>
+        <Map pois={data} selectedPoiIndex={selectedPoiIndex}/>
+      </MapErrorBoundary>
       <PoiList pois={data} selectedPoiIndex={selectedPoiIndex} setSelectedPoiIndex={setSelectedPoiIndex}/>
     </div>
   );

@@ -14,7 +14,7 @@ class UITests(unittest.TestCase):
     def tearDown(self):
         self.driver.close()
     
-    def test_with_valid_data(self):
+    def test_poi_navigation(self):
         startWithArgs(self.driver, 'valid_data')
         poiList = self.driver.find_element_by_class_name("poi-list")
         firstPoi = poiList.find_elements_by_tag_name("li")[0]
@@ -22,7 +22,6 @@ class UITests(unittest.TestCase):
         thirdPoi = poiList.find_elements_by_tag_name("li")[2]
         previousButton = self.driver.find_element_by_class_name("navigation-buttons").find_elements_by_tag_name("button")[0]
         nextButton = self.driver.find_element_by_class_name("navigation-buttons").find_elements_by_tag_name("button")[1]
-        filterSelect = Select(self.driver.find_element_by_tag_name("select"))
 
         # Initial state
         self.assertFalse('selected-item' in firstPoi.get_attribute("class"), "Item is initially selected when it shouldn't be")
@@ -56,6 +55,11 @@ class UITests(unittest.TestCase):
         self.assertFalse('selected-item' in firstPoi.get_attribute("class"), "Clicking the previous button highlighted the next item")
         self.assertTrue('selected-item' in secondPoi.get_attribute("class"), "Clicking the previous button didn't highlight the previous item")
         self.assertFalse('selected-item' in thirdPoi.get_attribute("class"), "Clicking the previous button kept the current item highlighted")
+
+    def test_poi_filtering(self):
+        startWithArgs(self.driver, 'valid_data')
+        poiList = self.driver.find_element_by_class_name("poi-list")
+        filterSelect = Select(self.driver.find_element_by_tag_name("select"))
 
         # The filter filters things
         filterSelect.select_by_value("StartStop")

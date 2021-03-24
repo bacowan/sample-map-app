@@ -7,6 +7,8 @@ import Popup from './popup';
 import PoiTag from '../types/poiTag';
 
 function Map({pois, selectedPoiIndex}: MapProps) {
+    const defaultMapZoom = 9;
+
     const mapContainer = useRef<HTMLDivElement>(null);
     const [map, setMap] = useState<mapboxgl.Map | null>(null);
     const [isMapLoaded, setIsMapLoaded] = useState(false);
@@ -40,7 +42,7 @@ function Map({pois, selectedPoiIndex}: MapProps) {
                 container: mapContainer.current,
                 style: 'mapbox://styles/mapbox/satellite-v9',
                 center: [0, 0],
-                zoom: 9
+                zoom: defaultMapZoom
             });
             scopeMap.on('load', () => setIsMapLoaded(true));
             setMap(scopeMap);
@@ -130,19 +132,14 @@ function Map({pois, selectedPoiIndex}: MapProps) {
     // Move to a given POI
     useEffect(() => {
         const scopeMap = map;
-        if (selectedPoiIndex != null && scopeMap != null) {
-            if (selectedPoiIndex < pois.length) {
-                const poi = pois[selectedPoiIndex];
-                const lonLat = [poi.lon, poi.lat] as mapboxgl.LngLatLike;
-                scopeMap.flyTo({
-                    center: lonLat,
-                    zoom: 9 // TODO: Make this a constant
-                });
-                showPopup(poi);
-            }
-            else {
-                //todo: error handling
-            }
+        if (selectedPoiIndex != null && scopeMap != null && selectedPoiIndex < pois.length) {
+            const poi = pois[selectedPoiIndex];
+            const lonLat = [poi.lon, poi.lat] as mapboxgl.LngLatLike;
+            scopeMap.flyTo({
+                center: lonLat,
+                zoom: defaultMapZoom
+            });
+            showPopup(poi);
         }
     }, [selectedPoiIndex, map]);
     
