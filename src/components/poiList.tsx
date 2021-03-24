@@ -1,7 +1,13 @@
+import { useState } from "react";
 import Poi from "../types/poi";
+import PoiTag from "../types/poiTag";
 import PoiListItem from "./poiListItem";
+import PoiTagFilter from "./poiTagFilter";
 
 function PoiList({pois, selectedPoiIndex, setSelectedPoiIndex}: PoiListProps) {
+
+    const [filter, setFilter] = useState<PoiTag | undefined>(undefined);
+
     function previousClick() {
         if (selectedPoiIndex != null) {
             setSelectedPoiIndex((selectedPoiIndex + pois.length - 1) % pois.length);
@@ -17,8 +23,10 @@ function PoiList({pois, selectedPoiIndex, setSelectedPoiIndex}: PoiListProps) {
     return (
         <div className="poi-list">
             <strong className="poi-list-header">Points of interest</strong>
+            <PoiTagFilter selectedValue={filter} setSelectedValue={setFilter}/>
             <ul>
                 {pois
+                    .filter(p => filter == undefined || p.tags.includes(filter))
                     .sort((p1, p2) => p2.plannedArrivalDate > p1.plannedArrivalDate ? -1 : 1)
                     .map((p, i) => <PoiListItem
                         key={i}

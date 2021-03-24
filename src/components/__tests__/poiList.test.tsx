@@ -5,6 +5,7 @@ import { act } from 'react-dom/test-utils';
 import { PoiListItemProps } from '../poiListItem';
 import Poi from '../../types/poi';
 import PoiTag from '../../types/poiTag';
+import { PoiTagFilterProps } from '../poiTagFilter';
 
 const leftClick = { button: 1 };
 const basicPoi : Poi = { lat: 0, lon: 0, title: "title", description: "desc", plannedArrivalDate: new Date('2020-01-01'), tags: [PoiTag.Lodging] };
@@ -18,6 +19,21 @@ jest.mock('../poiListItem', () => {
                     <p>{poi.title}</p>
                     <p>{index}</p>
                     <p>{isSelected ? 'selected' : 'not selected'}</p>
+                </div>
+            );
+        },
+    };
+});
+
+const mockLodgingTag = PoiTag.Lodging;
+jest.mock('../poiTagFilter', () => {
+    return {
+        __esModule: true,
+        default: ({selectedValue, setSelectedValue}: PoiTagFilterProps) => {
+            return (
+                <div>
+                    <button data-testid="lodgingButton" onClick={() => setSelectedValue(mockLodgingTag)}/>
+                    <p>{selectedValue}</p>
                 </div>
             );
         },
@@ -157,4 +173,46 @@ test('Pois sorted by date', () => {
     const secondElementText = within(secondElement).getByText('second');
     expect(firstElementText).toBeInTheDocument();
     expect(secondElementText).toBeInTheDocument();
+});
+
+test('Filter items with single tag', () => {
+    const pois: Array<Poi> = [
+        { lat: 0, lon: 0, title: "Lodging", description: "desc", plannedArrivalDate: new Date('2020-01-01'), tags: [mockLodgingTag] },
+        { lat: 0, lon: 0, title: "Maintenance", description: "desc", plannedArrivalDate: new Date('2020-01-01'), tags: [PoiTag.Maintenance] }
+    ];
+
+    const setSelectedPoiMock = jest.fn();
+
+    render(<PoiList pois={pois} selectedPoiIndex={null} setSelectedPoiIndex={setSelectedPoiMock}/>);
+
+    const lodgingButton = screen.getByTestId("lodgingButton");
+    const list = screen.getByRole("list");
+
+    lodgingButton.click();
+
+    expect(list.children.length).toBe(1);
+    const element = list.firstElementChild as HTMLElement;
+    const elementText = within(element).getByText("Lodging");
+    expect(elementText).toBeInTheDocument();
+});
+
+test('Items with multiple tags are only removed if no tags match the filter', () => {
+    const pois: Array<Poi> = [
+        { lat: 0, lon: 0, title: "Lodging", description: "desc", plannedArrivalDate: new Date('2020-01-01'), tags: [mockLodgingTag, PoiTag.Onsen] },
+        { lat: 0, lon: 0, title: "Maintenance", description: "desc", plannedArrivalDate: new Date('2020-01-01'), tags: [PoiTag.Maintenance, PoiTag.Onsen] }
+    ];
+
+    const setSelectedPoiMock = jest.fn();
+
+    render(<PoiList pois={pois} selectedPoiIndex={null} setSelectedPoiIndex={setSelectedPoiMock}/>);
+
+    const lodgingButton = screen.getByTestId("lodgingButton");
+    const list = screen.getByRole("list");
+
+    lodgingButton.click();
+
+    expect(list.children.length).toBe(1);
+    const element = list.firstElementChild as HTMLElement;
+    const elementText = within(element).getByText("Lodging");
+    expect(elementText).toBeInTheDocument();
 });

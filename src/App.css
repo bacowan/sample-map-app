@@ -74,3 +74,11 @@
 h1 {
     font-size: larger;
 }
+
+.filter-list > p {
+    display: inline;
+}
+
+.filter-list > * {
+    margin: 0.2em;
+}

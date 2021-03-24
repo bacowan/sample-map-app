@@ -5,7 +5,7 @@ const data = JSON.stringify([
             title: 'Wakkanai',
             description: 'Northermost point in mainland Japan',
             plannedArrivalDate: 'July 1 2022',
-            tags: ["Start or Stop"]
+            tags: ["StartStop"]
         },
         {
             lat: 30.997005309529722,
@@ -13,7 +13,7 @@ const data = JSON.stringify([
             title: 'Cape Sata',
             description: 'Southernmost point in mainland Japan',
             plannedArrivalDate: 'August 1 2022',
-            tags: ["Start or Stop"]
+            tags: ["StartStop"]
         }
     ]);
 

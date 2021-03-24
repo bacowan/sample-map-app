@@ -1,9 +1,9 @@
 enum PoiTag {
-    Lodging,
-    Maintenance,
-    Sightseeing,
-    Onsen,
-    "Start or Stop"
+    Lodging = "Lodging",
+    Maintenance = "Maintenance",
+    Sightseeing = "Sightseeing",
+    Onsen = "Onsen",
+    StartStop = "Start or Stop"
 }
 
 export default PoiTag;
