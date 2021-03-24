@@ -4,8 +4,10 @@ import PoiList from "../poiList"
 import { act } from 'react-dom/test-utils';
 import { PoiListItemProps } from '../poiListItem';
 import Poi from '../../types/poi';
+import PoiTag from '../../types/poiTag';
 
 const leftClick = { button: 1 };
+const basicPoi : Poi = { lat: 0, lon: 0, title: "title", description: "desc", plannedArrivalDate: new Date('2020-01-01'), tags: [PoiTag.Lodging] };
 
 jest.mock('../poiListItem', () => {
     return {
@@ -33,10 +35,7 @@ test('No POIs renders blank list', () => {
 });
 
 test('Selected POI is marked as selected', () => {
-    const pois: Array<Poi> = [
-        { lat: 0, lon: 0, title: "title", description: "desc" },
-        { lat: 0, lon: 0, title: "title", description: "desc" }
-    ]
+    const pois: Array<Poi> = [basicPoi, basicPoi];
     render(<PoiList pois={pois} selectedPoiIndex={0} setSelectedPoiIndex={() => {}}/>);
     
     const list = screen.getByRole("list");
@@ -49,10 +48,7 @@ test('Selected POI is marked as selected', () => {
 });
 
 test('Unselected POI is not marked as selected', () => {
-    const pois: Array<Poi> = [
-        { lat: 0, lon: 0, title: "title", description: "desc" },
-        { lat: 0, lon: 0, title: "title", description: "desc" }
-    ]
+    const pois: Array<Poi> = [basicPoi, basicPoi];
     render(<PoiList pois={pois} selectedPoiIndex={1} setSelectedPoiIndex={() => {}}/>);
     
     const list = screen.getByRole("list");
@@ -65,10 +61,7 @@ test('Unselected POI is not marked as selected', () => {
 });
 
 test('No selected POI does not highlight any', () => {
-    const pois: Array<Poi> = [
-        { lat: 0, lon: 0, title: "title", description: "desc" },
-        { lat: 0, lon: 0, title: "title", description: "desc" }
-    ]
+    const pois: Array<Poi> = [basicPoi, basicPoi];
     render(<PoiList pois={pois} selectedPoiIndex={null} setSelectedPoiIndex={() => {}}/>);
     
     const list = screen.getByRole("list");
@@ -84,9 +77,7 @@ test('No selected POI does not highlight any', () => {
 });
 
 test('Invalid POI index does not highlight any', () => {
-    const pois: Array<Poi> = [
-        { lat: 0, lon: 0, title: "title", description: "desc" }
-    ]
+    const pois: Array<Poi> = [basicPoi];
     render(<PoiList pois={pois} selectedPoiIndex={5} setSelectedPoiIndex={() => {}}/>);
     
     const list = screen.getByRole("list");
@@ -101,10 +92,7 @@ test('Invalid POI index does not highlight any', () => {
 // Test the buttons
 
 test('Next button wired up', () => {
-    const pois: Array<Poi> = [
-        { lat: 0, lon: 0, title: "title", description: "desc" },
-        { lat: 0, lon: 0, title: "title", description: "desc" }
-    ]
+    const pois: Array<Poi> = [basicPoi, basicPoi];
 
     const setSelectedPoiMock = jest.fn();
 
@@ -116,10 +104,7 @@ test('Next button wired up', () => {
 });
 
 test('Previous button wired up', () => {
-    const pois: Array<Poi> = [
-        { lat: 0, lon: 0, title: "title", description: "desc" },
-        { lat: 0, lon: 0, title: "title", description: "desc" }
-    ]
+    const pois: Array<Poi> = [basicPoi, basicPoi];
 
     const setSelectedPoiMock = jest.fn();
 
@@ -131,10 +116,7 @@ test('Previous button wired up', () => {
 });
 
 test('Next button loops', () => {
-    const pois: Array<Poi> = [
-        { lat: 0, lon: 0, title: "title", description: "desc" },
-        { lat: 0, lon: 0, title: "title", description: "desc" }
-    ]
+    const pois: Array<Poi> = [basicPoi, basicPoi];
 
     const setSelectedPoiMock = jest.fn();
 
@@ -146,10 +128,7 @@ test('Next button loops', () => {
 });
 
 test('Previous button loops', () => {
-    const pois: Array<Poi> = [
-        { lat: 0, lon: 0, title: "title", description: "desc" },
-        { lat: 0, lon: 0, title: "title", description: "desc" }
-    ]
+    const pois: Array<Poi> = [basicPoi, basicPoi];
 
     const setSelectedPoiMock = jest.fn();
 
@@ -158,4 +137,24 @@ test('Previous button loops', () => {
     fireEvent.click(screen.getByText('previous'), leftClick);
 
     expect(setSelectedPoiMock.mock.calls[0][0]).toBe(1);
+});
+
+test('Pois sorted by date', () => {
+    const pois: Array<Poi> = [
+        { lat: 0, lon: 0, title: "second", description: "desc", plannedArrivalDate: new Date('2020-01-02'), tags: [PoiTag.Lodging] },
+        { lat: 0, lon: 0, title: "first", description: "desc", plannedArrivalDate: new Date('2020-01-01'), tags: [PoiTag.Lodging] }
+    ];
+
+    const setSelectedPoiMock = jest.fn();
+
+    render(<PoiList pois={pois} selectedPoiIndex={null} setSelectedPoiIndex={setSelectedPoiMock}/>);
+
+    const list = screen.getByRole("list");
+
+    const firstElement = list.firstElementChild as HTMLElement;
+    const secondElement = list.lastElementChild as HTMLElement;
+    const firstElementText = within(firstElement).getByText('first');
+    const secondElementText = within(secondElement).getByText('second');
+    expect(firstElementText).toBeInTheDocument();
+    expect(secondElementText).toBeInTheDocument();
 });

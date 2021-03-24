@@ -18,12 +18,14 @@ function PoiList({pois, selectedPoiIndex, setSelectedPoiIndex}: PoiListProps) {
         <div className="poi-list">
             <strong className="poi-list-header">Points of interest</strong>
             <ul>
-                {pois.map((p, i) => <PoiListItem
-                    key={i}
-                    poi={p}
-                    index={i}
-                    isSelected={i === selectedPoiIndex}
-                    itemClickHandler={setSelectedPoiIndex}/>)}
+                {pois
+                    .sort((p1, p2) => p2.plannedArrivalDate > p1.plannedArrivalDate ? -1 : 1)
+                    .map((p, i) => <PoiListItem
+                        key={i}
+                        poi={p}
+                        index={i}
+                        isSelected={i === selectedPoiIndex}
+                        itemClickHandler={setSelectedPoiIndex}/>)}
             </ul>
             <div className="navigation-buttons poi-list-footer">
                 <button onClick={previousClick}>previous</button>
