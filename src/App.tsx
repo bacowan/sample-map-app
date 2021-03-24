@@ -7,14 +7,21 @@ import { getPois } from './utils';
 import Poi from './types/poi';
 import PoiTag from './types/poiTag';
 import MapErrorBoundary from './components/mapErrorBoundary';
+import WarningMessage from './components/warningMessage';
 
 function App() {
   const [data, setData] = useState<Poi[]>([]);
   const [selectedPoiIndex, setSelectedPoiIndex] = useState<number | null>(null);
+  const [hasWarning, setHasWarning] = useState(false);
 
   useEffect(() => {
     async function getData() {
-      setData(await getPois());
+      try {
+        setData(await getPois());
+      }
+      catch {
+        setHasWarning(true);
+      }
     }
     getData();
   }, []);
@@ -26,6 +33,7 @@ function App() {
         <Map pois={data} selectedPoiIndex={selectedPoiIndex}/>
       </MapErrorBoundary>
       <PoiList pois={data} selectedPoiIndex={selectedPoiIndex} setSelectedPoiIndex={setSelectedPoiIndex}/>
+      { hasWarning && <WarningMessage message="A problem was encountered when loading the data!"/> }
     </div>
   );
 }

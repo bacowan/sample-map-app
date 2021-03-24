@@ -2,34 +2,48 @@ import Poi from "./types/poi";
 import data from "./data";
 import PoiTag from "./types/poiTag";
 
+function modWithNegative(numerator: number, denominator: number) {
+    return numerator - denominator * (Math.floor(numerator / denominator));
+}
+
 export function normalizeLat(lat: number) {
-    return ((lat + 90) % 180) - 90;
+    return modWithNegative((lat + 90), 180) - 90;
 }
 
 export function normalizeLon(lon: number) {
-    return ((lon + 180) % 360) - 180;
+    return modWithNegative((lon + 180), 360) - 180;
 }
 
 export function poiFromJson(json: any) : Poi {
-    if (json.hasOwnProperty("lat") &&
-        json.hasOwnProperty("lon") &&
-        json.hasOwnProperty("title") &&
-        json.hasOwnProperty("description") &&
+    if (typeof json.lat === "number" &&
+        typeof json.lon === "number" &&
+        typeof json.title === "string" &&
+        typeof json.description === "string" &&
         json.hasOwnProperty("plannedArrivalDate") &&
         json.hasOwnProperty("tags")) {
             const tags = json.tags as Array<PoiTag>;
-            return {
-                lat: json.lat,
-                lon: json.lon,
-                title: json.title,
-                description: json.description,
-                plannedArrivalDate: new Date(json.plannedArrivalDate),
-                tags: tags
-            };
+            if (Array.isArray(tags) && tags.every(t => Object.keys(PoiTag).includes(t))) {
+                const date = new Date(json.plannedArrivalDate)
+                if (date instanceof Date && !isNaN(date.getTime())) {
+                    return {
+                        lat: json.lat,
+                        lon: json.lon,
+                        title: json.title,
+                        description: json.description,
+                        plannedArrivalDate: date,
+                        tags: tags
+                    };
+                }
+                else {
+                    throw "Invalid date";
+                }
+            }
+            else {
+                throw "Invalid Tag values exist";
+            }
     }
     else {
-        // TODO: Error handling
-        throw "missing property in Point of Interest";
+        throw "missing valid property in Point of Interest";
     }
 }
 
@@ -41,20 +55,11 @@ export function poiFromJson(json: any) : Poi {
 // we could instead intercept the network calls and replace the responses
 // with our test data.
 export async function getPois() : Promise<Poi[]> {
-    try {
-        const url = new URLSearchParams(window.location.search);
-        const poiParameter = url.get("pois");
-        const poiObj = JSON.parse(poiParameter == null ? data : poiParameter);
-        if (Array.isArray(poiObj)) {
-            return poiObj.map(p => poiFromJson(p));
-        }
-        else {
-            // TODO: Error handling
-            return [];
-        }
+    const url = new URLSearchParams(window.location.search);
+    const poiParameter = url.get("pois");
+    const poiObj = JSON.parse(poiParameter == null ? data : poiParameter);
+    if (Array.isArray(poiObj)) {
+        return poiObj.map(p => poiFromJson(p));
     }
-    catch (e) {
-        // TODO: Error handling
-        throw e;
-    }
+    throw "Invalid POI data"
 }

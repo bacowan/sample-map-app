@@ -22,8 +22,10 @@ class UITests(unittest.TestCase):
         thirdPoi = poiList.find_elements_by_tag_name("li")[2]
         previousButton = self.driver.find_element_by_class_name("navigation-buttons").find_elements_by_tag_name("button")[0]
         nextButton = self.driver.find_element_by_class_name("navigation-buttons").find_elements_by_tag_name("button")[1]
+        errorBox = self.driver.find_elements_by_class_name("warning-message")
 
         # Initial state
+        self.assertEqual(0, len(errorBox), "Data was valid, but an error message appeared")
         self.assertFalse('selected-item' in firstPoi.get_attribute("class"), "Item is initially selected when it shouldn't be")
         self.assertFalse('selected-item' in secondPoi.get_attribute("class"), "Item is initially selected when it shouldn't be")
         self.assertEqual(0, len(self.driver.find_elements_by_class_name("mapboxgl-popup")), "Popup is initially visible when it shouldn't be")
@@ -74,15 +76,19 @@ class UITests(unittest.TestCase):
     def test_with_blank_data(self):
         startWithArgs(self.driver, 'blank_data')
         pois = self.driver.find_element_by_class_name("poi-list").find_elements_by_tag_name("li")
-        # this really only checks that it doesn't blow up when there is nothing
-        self.assertEqual(0, len(pois))
+        errorBox = self.driver.find_elements_by_class_name("warning-message")
+
+        self.assertEqual(0, len(pois), "There were POIs present in the list when there was no POI data loaded")
+        self.assertEqual(0, len(errorBox), "Data was empty but valid, though an error message appeared anyways")
 
     def test_with_invalid_data(self):
         startWithArgs(self.driver, 'invalid_data')
         pois = self.driver.find_element_by_class_name("poi-list").find_elements_by_tag_name("li")
-        # this really only checks that it doesn't blow up when there's invalid data. Should
-        # act the same as when there is no data
-        self.assertEqual(0, len(pois))
+        errorBox = self.driver.find_elements_by_class_name("warning-message")
+
+        self.assertEqual(0, len(pois), "There were POIs present in the list when there was no POI data loaded")
+        self.assertEqual(1, len(errorBox), "The error box did not appear when there was an error loading the POI data")
+
 
 def startWithArgs(driver, filename):
     f = open('./testData/' + filename + '.js')
