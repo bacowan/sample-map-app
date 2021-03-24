@@ -1,13 +1,16 @@
-function Popup({header, body} : PopupProps) {
+import Poi from "../types/poi";
+import PoiTag from "../types/poiTag";
+
+function Popup({poi} : PopupProps) {
     return <>
-        <strong>{header}</strong>
-        <p>{body}</p>
+        <strong>{poi.title}: {poi.plannedArrivalDate.toDateString()}</strong>
+        <p>Tags: {poi.tags.join(", ")}</p>
+        <p>{poi.description}</p>
     </>
 }
 
 type PopupProps = {
-    header: string,
-    body: string
+    poi: Poi
 }
 
 export default Popup;

@@ -1,9 +1,10 @@
 import React, { useRef, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import * as mapboxgl from 'mapbox-gl';
-import Poi from '../types/poi';
-import { normalizeLat, normalizeLon } from '../utils';
+import Poi, { isPoi } from '../types/poi';
+import { normalizeLat, normalizeLon, poiFromJson } from '../utils';
 import Popup from './popup';
+import PoiTag from '../types/poiTag';
 
 function Map({pois, selectedPoiIndex}: MapProps) {
     const mapContainer = useRef<HTMLDivElement>(null);
@@ -11,16 +12,17 @@ function Map({pois, selectedPoiIndex}: MapProps) {
     const [isMapLoaded, setIsMapLoaded] = useState(false);
     const [popup, setPopup] = useState<mapboxgl.Popup | null>(null);
 
-    function showPopup(header: string, description: string, lngLat: mapboxgl.LngLatLike) {
+    function showPopup(poi: Poi) {
         const scopeMap = map;
         if (scopeMap != null) {
             // the previous popup sometimes hangs around; this forces it to close.
             if (popup != null) {
                 popup.remove();
             }
+            const lngLat = [poi.lon, poi.lat] as mapboxgl.LngLatLike
             const popupDiv = document.createElement('div');
             ReactDOM.render(
-                <Popup header={header} body={description}/>,
+                <Popup poi={poi}/>,
                 popupDiv
             );
             setPopup(new mapboxgl.Popup()
@@ -50,8 +52,15 @@ function Map({pois, selectedPoiIndex}: MapProps) {
         const scopeMap = map;
         if (isMapLoaded && scopeMap != null) {
             scopeMap.on('click', 'places', (e) => {
-                if (e.features != null && e.features[0].properties != null && e.features[0].properties.hasOwnProperty('title') && e.features[0].properties.hasOwnProperty('description')) {
-                    showPopup(e.features[0].properties.title, e.features[0].properties.description, e.lngLat);
+                if (e.features != null && e.features[0].properties != null && e.features[0].properties.poi != null) {
+                    try {
+                        const json = JSON.parse(e.features[0].properties.poi);
+                        const poi = poiFromJson(json);
+                        showPopup(poi);
+                    }
+                    catch (e) {
+                        // Error handling
+                    }
                 }
             });
 
@@ -77,11 +86,7 @@ function Map({pois, selectedPoiIndex}: MapProps) {
     
             const features = pois.map(p => { return {
                 type: 'Feature' as 'Feature',
-                properties: {
-                    title: p.title,
-                    description: p.description,
-                    icon: 'circle'
-                },
+                properties: { poi: JSON.stringify(p) },
                 geometry: {
                     type: 'Point' as 'Point',
                     coordinates: [
@@ -104,7 +109,6 @@ function Map({pois, selectedPoiIndex}: MapProps) {
                     'type': 'geojson',
                     'data': data }
                 );
-                
             }
     
             if (scopeMap.getLayer('places')) {
@@ -116,7 +120,7 @@ function Map({pois, selectedPoiIndex}: MapProps) {
                 type: 'symbol',
                 source: 'places',
                 layout: {
-                    'icon-image': '{icon}-15',
+                    'icon-image': 'circle-15',
                     'icon-allow-overlap': true
                 }
             });
@@ -134,7 +138,7 @@ function Map({pois, selectedPoiIndex}: MapProps) {
                     center: lonLat,
                     zoom: 9 // TODO: Make this a constant
                 });
-                showPopup(poi.title, poi.description, lonLat);
+                showPopup(poi);
             }
             else {
                 //todo: error handling

@@ -1,5 +1,6 @@
 import Poi from "./types/poi";
 import data from "./data";
+import PoiTag from "./types/poiTag";
 
 export function normalizeLat(lat: number) {
     return ((lat + 90) % 180) - 90;
@@ -9,16 +10,21 @@ export function normalizeLon(lon: number) {
     return ((lon + 180) % 360) - 180;
 }
 
-function poiFromJson(json: any) : Poi {
+export function poiFromJson(json: any) : Poi {
     if (json.hasOwnProperty("lat") &&
         json.hasOwnProperty("lon") &&
         json.hasOwnProperty("title") &&
-        json.hasOwnProperty("description")) {
+        json.hasOwnProperty("description") &&
+        json.hasOwnProperty("plannedArrivalDate") &&
+        json.hasOwnProperty("tags")) {
+            const tags = json.tags as Array<PoiTag>;
             return {
                 lat: json.lat,
                 lon: json.lon,
                 title: json.title,
-                description: json.description
+                description: json.description,
+                plannedArrivalDate: new Date(json.plannedArrivalDate),
+                tags: tags
             };
     }
     else {

@@ -5,6 +5,7 @@ import Title from './components/title'
 import './App.css';
 import { getPois } from './utils';
 import Poi from './types/poi';
+import PoiTag from './types/poiTag';
 
 function App() {
   const [data, setData] = useState<Poi[]>([]);
