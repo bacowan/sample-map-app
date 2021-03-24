@@ -25,14 +25,13 @@ jest.mock('../poiListItem', () => {
     };
 });
 
-const mockLodgingTag = PoiTag.Lodging;
 jest.mock('../poiTagFilter', () => {
     return {
         __esModule: true,
         default: ({selectedValue, setSelectedValue}: PoiTagFilterProps) => {
             return (
                 <div>
-                    <button data-testid="lodgingButton" onClick={() => setSelectedValue(mockLodgingTag)}/>
+                    <button data-testid="lodgingButton"/>
                     <p>{selectedValue}</p>
                 </div>
             );
@@ -43,7 +42,7 @@ jest.mock('../poiTagFilter', () => {
 // Test the list itself
 
 test('No POIs renders blank list', () => {
-    render(<PoiList pois={[]} selectedPoiIndex={null} setSelectedPoiIndex={() => {}}/>);
+    render(<PoiList pois={[]} selectedPoiIndex={null} poiFilter={undefined} setSelectedPoiIndex={() => {}} setPoiFilter={() => {}}/>);
     
     const list = screen.getByRole("list");
 
@@ -52,7 +51,7 @@ test('No POIs renders blank list', () => {
 
 test('Selected POI is marked as selected', () => {
     const pois: Array<Poi> = [basicPoi, basicPoi];
-    render(<PoiList pois={pois} selectedPoiIndex={0} setSelectedPoiIndex={() => {}}/>);
+    render(<PoiList pois={pois} selectedPoiIndex={0} poiFilter={undefined} setSelectedPoiIndex={() => {}} setPoiFilter={() => {}}/>);
     
     const list = screen.getByRole("list");
 
@@ -65,7 +64,7 @@ test('Selected POI is marked as selected', () => {
 
 test('Unselected POI is not marked as selected', () => {
     const pois: Array<Poi> = [basicPoi, basicPoi];
-    render(<PoiList pois={pois} selectedPoiIndex={1} setSelectedPoiIndex={() => {}}/>);
+    render(<PoiList pois={pois} selectedPoiIndex={1} poiFilter={undefined} setSelectedPoiIndex={() => {}} setPoiFilter={() => {}}/>);
     
     const list = screen.getByRole("list");
 
@@ -78,7 +77,7 @@ test('Unselected POI is not marked as selected', () => {
 
 test('No selected POI does not highlight any', () => {
     const pois: Array<Poi> = [basicPoi, basicPoi];
-    render(<PoiList pois={pois} selectedPoiIndex={null} setSelectedPoiIndex={() => {}}/>);
+    render(<PoiList pois={pois} selectedPoiIndex={null} poiFilter={undefined} setSelectedPoiIndex={() => {}} setPoiFilter={() => {}}/>);
     
     const list = screen.getByRole("list");
 
@@ -94,7 +93,7 @@ test('No selected POI does not highlight any', () => {
 
 test('Invalid POI index does not highlight any', () => {
     const pois: Array<Poi> = [basicPoi];
-    render(<PoiList pois={pois} selectedPoiIndex={5} setSelectedPoiIndex={() => {}}/>);
+    render(<PoiList pois={pois} selectedPoiIndex={5} poiFilter={undefined} setSelectedPoiIndex={() => {}} setPoiFilter={() => {}}/>);
     
     const list = screen.getByRole("list");
 
@@ -112,7 +111,7 @@ test('Next button wired up', () => {
 
     const setSelectedPoiMock = jest.fn();
 
-    render(<PoiList pois={pois} selectedPoiIndex={0} setSelectedPoiIndex={setSelectedPoiMock}/>);
+    render(<PoiList pois={pois} selectedPoiIndex={0} setSelectedPoiIndex={setSelectedPoiMock} poiFilter={undefined} setPoiFilter={() => {}}/>);
     
     fireEvent.click(screen.getByText('next'), leftClick);
 
@@ -124,7 +123,7 @@ test('Previous button wired up', () => {
 
     const setSelectedPoiMock = jest.fn();
 
-    render(<PoiList pois={pois} selectedPoiIndex={1} setSelectedPoiIndex={setSelectedPoiMock}/>);
+    render(<PoiList pois={pois} selectedPoiIndex={1} setSelectedPoiIndex={setSelectedPoiMock} poiFilter={undefined} setPoiFilter={() => {}}/>);
     
     fireEvent.click(screen.getByText('previous'), leftClick);
 
@@ -136,7 +135,7 @@ test('Next button loops', () => {
 
     const setSelectedPoiMock = jest.fn();
 
-    render(<PoiList pois={pois} selectedPoiIndex={1} setSelectedPoiIndex={setSelectedPoiMock}/>);
+    render(<PoiList pois={pois} selectedPoiIndex={1} setSelectedPoiIndex={setSelectedPoiMock} poiFilter={undefined} setPoiFilter={() => {}}/>);
     
     fireEvent.click(screen.getByText('next'), leftClick);
 
@@ -148,7 +147,7 @@ test('Previous button loops', () => {
 
     const setSelectedPoiMock = jest.fn();
 
-    render(<PoiList pois={pois} selectedPoiIndex={0} setSelectedPoiIndex={setSelectedPoiMock}/>);
+    render(<PoiList pois={pois} selectedPoiIndex={0} setSelectedPoiIndex={setSelectedPoiMock} poiFilter={undefined} setPoiFilter={() => {}}/>);
     
     fireEvent.click(screen.getByText('previous'), leftClick);
 
@@ -163,7 +162,7 @@ test('Pois sorted by date', () => {
 
     const setSelectedPoiMock = jest.fn();
 
-    render(<PoiList pois={pois} selectedPoiIndex={null} setSelectedPoiIndex={setSelectedPoiMock}/>);
+    render(<PoiList pois={pois} selectedPoiIndex={null} setSelectedPoiIndex={setSelectedPoiMock} poiFilter={undefined} setPoiFilter={() => {}}/>);
 
     const list = screen.getByRole("list");
 
@@ -177,18 +176,15 @@ test('Pois sorted by date', () => {
 
 test('Filter items with single tag', () => {
     const pois: Array<Poi> = [
-        { lat: 0, lon: 0, title: "Lodging", description: "desc", plannedArrivalDate: new Date('2020-01-01'), tags: [mockLodgingTag] },
+        { lat: 0, lon: 0, title: "Lodging", description: "desc", plannedArrivalDate: new Date('2020-01-01'), tags: [PoiTag.Lodging] },
         { lat: 0, lon: 0, title: "Maintenance", description: "desc", plannedArrivalDate: new Date('2020-01-01'), tags: [PoiTag.Maintenance] }
     ];
 
     const setSelectedPoiMock = jest.fn();
 
-    render(<PoiList pois={pois} selectedPoiIndex={null} setSelectedPoiIndex={setSelectedPoiMock}/>);
+    render(<PoiList pois={pois} selectedPoiIndex={null} setSelectedPoiIndex={setSelectedPoiMock} poiFilter={PoiTag.Lodging} setPoiFilter={() => {}}/>);
 
-    const lodgingButton = screen.getByTestId("lodgingButton");
     const list = screen.getByRole("list");
-
-    lodgingButton.click();
 
     expect(list.children.length).toBe(1);
     const element = list.firstElementChild as HTMLElement;
@@ -198,18 +194,15 @@ test('Filter items with single tag', () => {
 
 test('Items with multiple tags are only removed if no tags match the filter', () => {
     const pois: Array<Poi> = [
-        { lat: 0, lon: 0, title: "Lodging", description: "desc", plannedArrivalDate: new Date('2020-01-01'), tags: [mockLodgingTag, PoiTag.Onsen] },
+        { lat: 0, lon: 0, title: "Lodging", description: "desc", plannedArrivalDate: new Date('2020-01-01'), tags: [PoiTag.Lodging, PoiTag.Onsen] },
         { lat: 0, lon: 0, title: "Maintenance", description: "desc", plannedArrivalDate: new Date('2020-01-01'), tags: [PoiTag.Maintenance, PoiTag.Onsen] }
     ];
 
     const setSelectedPoiMock = jest.fn();
 
-    render(<PoiList pois={pois} selectedPoiIndex={null} setSelectedPoiIndex={setSelectedPoiMock}/>);
+    render(<PoiList pois={pois} selectedPoiIndex={null} setSelectedPoiIndex={setSelectedPoiMock} poiFilter={PoiTag.Lodging} setPoiFilter={() => {}}/>);
 
-    const lodgingButton = screen.getByTestId("lodgingButton");
     const list = screen.getByRole("list");
-
-    lodgingButton.click();
 
     expect(list.children.length).toBe(1);
     const element = list.firstElementChild as HTMLElement;

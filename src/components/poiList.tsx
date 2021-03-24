@@ -4,9 +4,7 @@ import PoiTag from "../types/poiTag";
 import PoiListItem from "./poiListItem";
 import PoiTagFilter from "./poiTagFilter";
 
-function PoiList({pois, selectedPoiIndex, setSelectedPoiIndex}: PoiListProps) {
-
-    const [filter, setFilter] = useState<PoiTag | undefined>(undefined);
+function PoiList({pois, selectedPoiIndex, setSelectedPoiIndex, poiFilter, setPoiFilter}: PoiListProps) {
 
     function previousClick() {
         if (selectedPoiIndex != null) {
@@ -23,10 +21,10 @@ function PoiList({pois, selectedPoiIndex, setSelectedPoiIndex}: PoiListProps) {
     return (
         <div className="poi-list">
             <strong className="poi-list-header">Points of interest</strong>
-            <PoiTagFilter selectedValue={filter} setSelectedValue={setFilter}/>
+            <PoiTagFilter selectedValue={poiFilter} setSelectedValue={setPoiFilter}/>
             <ul>
                 {pois
-                    .filter(p => filter == undefined || p.tags.includes(filter))
+                    .filter(p => poiFilter == undefined || p.tags.includes(poiFilter))
                     .sort((p1, p2) => p2.plannedArrivalDate > p1.plannedArrivalDate ? -1 : 1)
                     .map((p, i) => <PoiListItem
                         key={i}
@@ -45,7 +43,9 @@ function PoiList({pois, selectedPoiIndex, setSelectedPoiIndex}: PoiListProps) {
 type PoiListProps = {
     pois: Poi[],
     selectedPoiIndex: number | null,
-    setSelectedPoiIndex: (index: number) => void
+    poiFilter: PoiTag | undefined,
+    setSelectedPoiIndex: (index: number) => void,
+    setPoiFilter: (tag: PoiTag | undefined) => void
 }
 
 export default PoiList;

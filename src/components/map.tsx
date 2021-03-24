@@ -6,7 +6,7 @@ import { normalizeLat, normalizeLon, poiFromJson } from '../utils';
 import Popup from './popup';
 import PoiTag from '../types/poiTag';
 
-function Map({pois, selectedPoiIndex}: MapProps) {
+function Map({pois, selectedPoiIndex, poiFilter}: MapProps) {
     const defaultMapZoom = 9;
 
     const mapContainer = useRef<HTMLDivElement>(null);
@@ -34,6 +34,51 @@ function Map({pois, selectedPoiIndex}: MapProps) {
         }
     }
 
+    function updatePois(scopeMap: mapboxgl.Map) {
+        const features = pois
+            .filter(p => poiFilter === undefined || p.tags.includes(poiFilter))
+            .map(p => { return {
+                type: 'Feature' as 'Feature',
+                properties: { poi: JSON.stringify(p) },
+                geometry: {
+                    type: 'Point' as 'Point',
+                    coordinates: [
+                        p.lon,
+                        p.lat
+                    ]
+                }
+            }});
+
+        const data : GeoJSON.FeatureCollection<GeoJSON.Geometry> = {
+            'type': 'FeatureCollection',
+            'features': features
+        };
+        const source = scopeMap.getSource('places') as mapboxgl.GeoJSONSource;
+        if (source) {
+            source.setData(data);
+        }
+        else {
+            scopeMap.addSource('places', {
+                'type': 'geojson',
+                'data': data }
+            );
+        }
+
+        if (scopeMap.getLayer('places')) {
+            scopeMap.removeLayer('places');
+        }
+
+        scopeMap.addLayer({
+            id: 'places',
+            type: 'symbol',
+            source: 'places',
+            layout: {
+                'icon-image': 'circle-15',
+                'icon-allow-overlap': true
+            }
+        });
+    }
+
     // Initialize the map. When it finishes loading, the next effect will finish initialization
     useEffect(() => {
         if (mapContainer.current != null) {
@@ -50,6 +95,7 @@ function Map({pois, selectedPoiIndex}: MapProps) {
         }
     }, [mapContainer]);
 
+    // Initialize the rest of the map once it's finished loading
     useEffect(() => {
         const scopeMap = map;
         if (isMapLoaded && scopeMap != null) {
@@ -77,7 +123,7 @@ function Map({pois, selectedPoiIndex}: MapProps) {
         }
     }, [map, isMapLoaded]);
 
-    // update POIs
+    // update with new POIs
     useEffect(() => {
         const scopeMap = map;
         if (isMapLoaded && scopeMap != null) {
@@ -85,49 +131,17 @@ function Map({pois, selectedPoiIndex}: MapProps) {
                 const lngLats = pois.map(p => new mapboxgl.LngLat(normalizeLon(p.lon), normalizeLat(p.lat))) as mapboxgl.LngLatBoundsLike;
                 scopeMap.fitBounds(lngLats);
             }
-    
-            const features = pois.map(p => { return {
-                type: 'Feature' as 'Feature',
-                properties: { poi: JSON.stringify(p) },
-                geometry: {
-                    type: 'Point' as 'Point',
-                    coordinates: [
-                        p.lon,
-                        p.lat
-                    ]
-                }
-            }});
-
-            const data : GeoJSON.FeatureCollection<GeoJSON.Geometry> = {
-                'type': 'FeatureCollection',
-                'features': features
-            };
-            const source = scopeMap.getSource('places') as mapboxgl.GeoJSONSource;
-            if (source) {
-                source.setData(data);
-            }
-            else {
-                scopeMap.addSource('places', {
-                    'type': 'geojson',
-                    'data': data }
-                );
-            }
-    
-            if (scopeMap.getLayer('places')) {
-                scopeMap.removeLayer('places');
-            }
-
-            scopeMap.addLayer({
-                id: 'places',
-                type: 'symbol',
-                source: 'places',
-                layout: {
-                    'icon-image': 'circle-15',
-                    'icon-allow-overlap': true
-                }
-            });
+            updatePois(scopeMap);
         }
     }, [map, isMapLoaded, pois]);
+
+    // Filter POIs
+    useEffect(() => {
+        const scopeMap = map;
+        if (isMapLoaded && scopeMap != null) {
+            updatePois(scopeMap);
+        }
+    }, [map, isMapLoaded, poiFilter]);
 
     // Move to a given POI
     useEffect(() => {
@@ -153,7 +167,8 @@ function Map({pois, selectedPoiIndex}: MapProps) {
 
 type MapProps = {
     pois: Poi[],
-    selectedPoiIndex: number | null
+    selectedPoiIndex: number | null,
+    poiFilter: PoiTag | undefined
 }
 
 export default Map;

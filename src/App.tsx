@@ -12,6 +12,7 @@ import WarningMessage from './components/warningMessage';
 function App() {
   const [data, setData] = useState<Poi[]>([]);
   const [selectedPoiIndex, setSelectedPoiIndex] = useState<number | null>(null);
+  const [poiFilter, setPoiFilter] = useState<PoiTag | undefined>(undefined);
   const [hasWarning, setHasWarning] = useState(false);
 
   useEffect(() => {
@@ -30,9 +31,9 @@ function App() {
     <div className="App">
       <Title header="Cycling trip across Japan" body="A list of waypoints that I'd like to visit on a cycling trip across Japan."/>
       <MapErrorBoundary>
-        <Map pois={data} selectedPoiIndex={selectedPoiIndex}/>
+        <Map pois={data} selectedPoiIndex={selectedPoiIndex} poiFilter={poiFilter}/>
       </MapErrorBoundary>
-      <PoiList pois={data} selectedPoiIndex={selectedPoiIndex} setSelectedPoiIndex={setSelectedPoiIndex}/>
+      <PoiList pois={data} selectedPoiIndex={selectedPoiIndex} setSelectedPoiIndex={setSelectedPoiIndex} poiFilter={poiFilter} setPoiFilter={setPoiFilter}/>
       { hasWarning && <WarningMessage message="A problem was encountered when loading the data!"/> }
     </div>
   );
