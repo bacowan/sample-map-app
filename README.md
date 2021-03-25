@@ -26,7 +26,7 @@ There are 2 sets of tests: unit tests and UI tests.
 1. Navigate to `sample-map-app` and run `npm test`.
 
 ### UI Tests
-1. Make sure you version 3.7.8 of python installed
+1. Make sure you version 3.7.8 or greater of python installed
 1. Make sure you have selenium for python installed (`pip install selenium`).
 1. Download [Chrome WebDriver](https://chromedriver.chromium.org/downloads) and place it in `sample-map-app\selenium_tests\chromedriver.exe`.
 1. Make sure that the app is running

@@ -4,17 +4,23 @@ import PoiTag from "../types/poiTag";
 import PoiListItem from "./poiListItem";
 import PoiTagFilter from "./poiTagFilter";
 
-function PoiList({pois, selectedPoiIndex, setSelectedPoiIndex, poiFilter, setPoiFilter}: PoiListProps) {
+function PoiList({pois, selectedPoi, setSelectedPoi, poiFilter, setPoiFilter}: PoiListProps) {
+
+    const filteredPois = pois
+        .filter(p => poiFilter == undefined || p.tags.includes(poiFilter))
+        .sort((p1, p2) => p2.plannedArrivalDate > p1.plannedArrivalDate ? -1 : 1)
 
     function previousClick() {
-        if (selectedPoiIndex != null) {
-            setSelectedPoiIndex((selectedPoiIndex + pois.length - 1) % pois.length);
+        if (selectedPoi != null) {
+            const index = filteredPois.indexOf(selectedPoi);
+            setSelectedPoi(filteredPois[(index + filteredPois.length - 1) % filteredPois.length]);
         }
     }
 
     function nextClick() {
-        if (selectedPoiIndex != null) {
-            setSelectedPoiIndex((selectedPoiIndex + 1) % pois.length);
+        if (selectedPoi != null) {
+            const index = filteredPois.indexOf(selectedPoi);
+            setSelectedPoi(filteredPois[(index + 1) % filteredPois.length]);
         }
     }
 
@@ -23,15 +29,11 @@ function PoiList({pois, selectedPoiIndex, setSelectedPoiIndex, poiFilter, setPoi
             <strong className="poi-list-header">Points of interest</strong>
             <PoiTagFilter selectedValue={poiFilter} setSelectedValue={setPoiFilter}/>
             <ul>
-                {pois
-                    .filter(p => poiFilter == undefined || p.tags.includes(poiFilter))
-                    .sort((p1, p2) => p2.plannedArrivalDate > p1.plannedArrivalDate ? -1 : 1)
-                    .map((p, i) => <PoiListItem
-                        key={i}
-                        poi={p}
-                        index={i}
-                        isSelected={i === selectedPoiIndex}
-                        itemClickHandler={setSelectedPoiIndex}/>)}
+                {filteredPois.map((p, i) => <PoiListItem
+                    key={i}
+                    poi={p}
+                    isSelected={p === selectedPoi}
+                    itemClickHandler={setSelectedPoi}/>)}
             </ul>
             <div className="navigation-buttons poi-list-footer">
                 <button onClick={previousClick}>previous</button>
@@ -42,9 +44,9 @@ function PoiList({pois, selectedPoiIndex, setSelectedPoiIndex, poiFilter, setPoi
 
 type PoiListProps = {
     pois: Poi[],
-    selectedPoiIndex: number | null,
+    selectedPoi: Poi | null,
     poiFilter: PoiTag | undefined,
-    setSelectedPoiIndex: (index: number) => void,
+    setSelectedPoi: (poi: Poi) => void,
     setPoiFilter: (tag: PoiTag | undefined) => void
 }
 

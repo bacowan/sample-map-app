@@ -11,9 +11,11 @@ import PoiTag from '../types/poiTag';
 // eslint-disable-next-line import/no-webpack-loader-syntax
 mapboxgl.workerClass = require('worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker').default;
 
-function Map({pois, selectedPoiIndex, poiFilter}: MapProps) {
+function Map({pois, selectedPoi, setSelectedPoi, poiFilter}: MapProps) {
     const defaultMapZoom = 9;
     const defaultPadding = 50;
+
+    const filteredPois = pois.filter(p => poiFilter === undefined || p.tags.includes(poiFilter))
 
     const mapContainer = useRef<HTMLDivElement>(null);
     const [map, setMap] = useState<mapboxgl.Map | null>(null);
@@ -41,11 +43,10 @@ function Map({pois, selectedPoiIndex, poiFilter}: MapProps) {
     }
 
     function updatePois(scopeMap: mapboxgl.Map) {
-        const features = pois
-            .filter(p => poiFilter === undefined || p.tags.includes(poiFilter))
-            .map(p => { return {
+        const features = filteredPois
+            .map((p, i) => { return {
                 type: 'Feature' as 'Feature',
-                properties: { poi: JSON.stringify(p) },
+                properties: { index: i },
                 geometry: {
                     type: 'Point' as 'Point',
                     coordinates: [
@@ -106,11 +107,10 @@ function Map({pois, selectedPoiIndex, poiFilter}: MapProps) {
         const scopeMap = map;
         if (isMapLoaded && scopeMap != null) {
             scopeMap.on('click', 'places', (e) => {
-                if (e.features != null && e.features[0].properties != null && e.features[0].properties.poi != null) {
+                if (e.features != null && e.features[0].properties != null && e.features[0].properties.index != null && e.features[0].properties.index < pois.length) {
                     try {
-                        const json = JSON.parse(e.features[0].properties.poi);
-                        const poi = poiFromJson(json);
-                        showPopup(poi);
+                        const poi = pois[e.features[0].properties.index]
+                        setSelectedPoi(poi);
                     }
                     catch (e) {
                         // Error handling
@@ -158,16 +158,15 @@ function Map({pois, selectedPoiIndex, poiFilter}: MapProps) {
     // Move to a given POI
     useEffect(() => {
         const scopeMap = map;
-        if (selectedPoiIndex != null && scopeMap != null && selectedPoiIndex < pois.length) {
-            const poi = pois[selectedPoiIndex];
-            const lonLat = [poi.lon, poi.lat] as mapboxgl.LngLatLike;
+        if (selectedPoi != null && scopeMap != null && filteredPois.includes(selectedPoi)) {
+            const lonLat = [selectedPoi.lon, selectedPoi.lat] as mapboxgl.LngLatLike;
             scopeMap.flyTo({
                 center: lonLat,
                 zoom: defaultMapZoom
             });
-            showPopup(poi);
+            showPopup(selectedPoi);
         }
-    }, [selectedPoiIndex, map]);
+    }, [selectedPoi, map]);
     
     if (mapContainer == null) {
         return <div/>
@@ -179,8 +178,9 @@ function Map({pois, selectedPoiIndex, poiFilter}: MapProps) {
 
 type MapProps = {
     pois: Poi[],
-    selectedPoiIndex: number | null,
-    poiFilter: PoiTag | undefined
+    poiFilter: PoiTag | undefined,
+    selectedPoi: Poi | null,
+    setSelectedPoi: (index: Poi | null) => void
 }
 
 export default Map;
