@@ -18,7 +18,7 @@ function PoiTagFilter({selectedValue, setSelectedValue} : PoiTagFilterProps) {
         <div className="filter-list">
             <p>Filter by: </p>
             <select value={selectedValue} onChange={onChange}>
-                <option key="" value=""></option>
+                <option key="" value="">(Show all)</option>
                 {options}
             </select>
         </div>

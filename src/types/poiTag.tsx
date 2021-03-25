@@ -1,6 +1,6 @@
 enum PoiTag {
     Lodging = "Lodging",
-    Maintenance = "Maintenance",
+    Maintenance = "Bike Maintenance Area",
     Sightseeing = "Sightseeing",
     Onsen = "Onsen",
     StartStop = "Start or Stop"

@@ -1,13 +1,19 @@
 import React, { useRef, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
-import * as mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import mapboxgl from 'mapbox-gl';
 import Poi, { isPoi } from '../types/poi';
 import { normalizeLat, normalizeLon, poiFromJson } from '../utils';
 import Popup from './popup';
 import PoiTag from '../types/poiTag';
 
+// @ts-ignore
+// eslint-disable-next-line import/no-webpack-loader-syntax
+mapboxgl.workerClass = require('worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker').default;
+
 function Map({pois, selectedPoiIndex, poiFilter}: MapProps) {
     const defaultMapZoom = 9;
+    const defaultPadding = 50;
 
     const mapContainer = useRef<HTMLDivElement>(null);
     const [map, setMap] = useState<mapboxgl.Map | null>(null);
@@ -128,8 +134,14 @@ function Map({pois, selectedPoiIndex, poiFilter}: MapProps) {
         const scopeMap = map;
         if (isMapLoaded && scopeMap != null) {
             if (pois.length > 0) {
-                const lngLats = pois.map(p => new mapboxgl.LngLat(normalizeLon(p.lon), normalizeLat(p.lat))) as mapboxgl.LngLatBoundsLike;
-                scopeMap.fitBounds(lngLats);
+                const allLngLats = pois.map(p => new mapboxgl.LngLat(normalizeLon(p.lon), normalizeLat(p.lat)));
+                const lngLats = allLngLats
+                    .reduce(
+                        (bounds, coord) => bounds.extend(coord),
+                        new mapboxgl.LngLatBounds(allLngLats[0], allLngLats[0]));
+                scopeMap.fitBounds(lngLats, {
+                    padding: { top: defaultPadding, bottom: defaultPadding, left: defaultPadding, right: defaultPadding }
+                });
             }
             updatePois(scopeMap);
         }

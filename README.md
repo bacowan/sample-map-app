@@ -10,9 +10,13 @@ This is a map which shows potential waypoints in a cycling trip across Japan.
     Where `{YOUR_MAPBOX_TOKEN}` is your mapbox token.
 
 ## Running the app
-To run the app in development mode, navigate to `sample-map-app` and run the command `react start`.
+### Development mode
+1. Navigate to `sample-map-app` and run the command `react start`.
 
-To run the app in production mode, 
+### Production mode
+1. Make sure that serve is installed (`npm install -g serve`)
+1. Build the app with `npm run build`
+1. Run `serve -s build`
 
 ## Tests
 There are 2 sets of tests: unit tests and UI tests.
